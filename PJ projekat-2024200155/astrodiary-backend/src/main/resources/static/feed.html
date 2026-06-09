@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Astro Diary Feed</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css"
+          rel="stylesheet">
+
+          <link rel="preconnect"
+          href="https://fonts.googleapis.com">
+
+          <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+     <link rel="stylesheet" href="feed.css">
+</head>
+<body>
+    
+<div class="star-layer"></div>
+
+
+<header class="header">
+
+    <div class="logo-section">
+
+        <div class="moon-icon">
+            ☾
+        </div>
+
+        <h1 class="logo">
+            Astro Diary
+        </h1>
+
+    </div>
+
+   <div class="user-section">
+        
+        <div class="welcome-text" id="welcomeText">
+            Welcome, (name of user)  <i class="fa-regular fa-circle-user"></i>
+        </div>
+
+        <button class="header-btn" id="newPostBtn">
+            <i class="fa-solid fa-plus"></i>
+            New Post
+        </button>
+
+        <button class="header-btn logout-btn" id="logoutBtn">
+            <i class="fa-solid fa-right-from-bracket"></i>
+            Logout
+        </button>
+    </div>
+
+</header>
+
+<div class="top-divider">
+
+    ✦
+
+</div>
+
+<section class="feed-title-section">
+    <h2>Your Diary Entries</h2>
+    <div class="small-line"></div>
+</section>
+
+<section id="postsContainer" style="width: 100%; display: none; flex-direction: column; align-items: center; justify-content: center; margin: 0 auto; padding: 20px 0;"></section>
+
+<section class="empty-feed" id="emptyFeedPanel" style="display: none; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; min-height: 50vh; margin: 0 auto;">
+    <div class="empty-card" style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; margin: 0 auto;">
+        
+        <div class="empty-icon" style="text-align: center; width: 100%; margin-bottom: 10px;">
+            ☽
+        </div>
+
+        <h2>Create Your First Post</h2>
+        
+        <p style="text-align: center; margin-bottom: 20px;">
+            Your cosmic thoughts deserve a place among the stars.
+        </p>
+
+        <button class="create-btn" id="beginWritingBtn" style="margin: 0 auto;">
+            <i class="fa-solid fa-star"></i>
+            Begin Writing
+        </button>
+    </div>
+
+    <div class="moon-phases">
+        ☾ ○ ◐ ● ◑ ○ ☽
+    </div>
+</section>
+
+<script>
+
+window.addEventListener('DOMContentLoaded', () => {
+    
+    
+    const loggedInUser = localStorage.getItem('loggedInUser');
+    console.log("Provera memorije - ulogovan je:", loggedInUser);
+
+    if (!loggedInUser) {
+        alert("Niste ulogovani! Vraćamo vas na početnu.");
+        window.location.href = "index.html";
+        return;
+    }
+
+    
+    const welcomeElement = document.getElementById('welcomeText');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const newPostBtn = document.getElementById('newPostBtn');
+    const beginWritingBtn = document.getElementById('beginWritingBtn');
+    const emptyFeedPanel = document.getElementById('emptyFeedPanel');
+
+    
+    if (welcomeElement) {
+        welcomeElement.innerHTML = "Welcome, " + loggedInUser + " <i class='fa-regular fa-circle-user'></i>";
+    } else {
+        console.error("Greška: Element sa id='welcomeText' nije pronađen u HTML-u!");
+    }
+
+    
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+            localStorage.removeItem('loggedInUser');
+            window.location.href = "index.html";
+        });
+    }
+
+    
+    if (newPostBtn) {
+        newPostBtn.addEventListener('click', () => {
+            window.location.href = "create-post.html";
+        });
+    }
+
+    
+    if (beginWritingBtn) {
+        beginWritingBtn.addEventListener('click', () => {
+            window.location.href = "create-post.html";
+        });
+    }
+
+    
+    loadUserPosts(loggedInUser);
+});
+
+
+async function loadUserPosts(username) {
+    const emptyFeedPanel = document.getElementById('emptyFeedPanel');
+    const postsContainer = document.getElementById('postsContainer');
+
+    if (!postsContainer || !emptyFeedPanel) return;
+
+    try {
+        const response = await fetch("http://localhost:8085/api/posts/user/" + username);
+        
+        if (response.ok) {
+            const posts = await response.json();
+            console.log("JavaScript je STVARNO primio ovoliko postova:", posts.length);
+            
+            postsContainer.innerHTML = ""; 
+
+            if (posts.length === 0) {
+                if (emptyFeedPanel) emptyFeedPanel.style.setProperty('display', 'flex', 'important');
+                postsContainer.style.display = "none";
+            } else {
+                if (emptyFeedPanel) emptyFeedPanel.style.setProperty('display', 'none', 'important');
+                postsContainer.style.setProperty('display', 'flex', 'important');
+                postsContainer.style.flexDirection = "column"; 
+                postsContainer.style.gap = "20px"; 
+
+             posts.forEach(post => {
+    const card = document.createElement('div');
+    card.className = 'empty-card'; 
+    card.style.width = "100%"; 
+    card.style.maxWidth = "600px"; 
+    card.style.margin = "0 auto";
+    card.style.position = "relative"; 
+
+   
+    let prikazDatuma = "";
+    if (post.datumObjave) {
+        const d = new Date(post.datumObjave);
+       
+        const dan = String(d.getDate()).padStart(2, '0');
+        const mesec = String(d.getMonth() + 1).padStart(2, '0');
+        const godina = d.getFullYear();
+        const sati = String(d.getHours()).padStart(2, '0');
+        const minuti = String(d.getMinutes()).padStart(2, '0');
+        
+        prikazDatuma = `${dan}.${mesec}.${godina}. ✦ ${sati}:${minuti}`;
+    }
+
+    
+    card.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 10px;">
+            <div class="empty-icon" style="margin: 0;">✦</div>
+            <span style="font-size: 0.85rem; color: #a29bfe; font-family: 'Poppins', sans-serif; font-weight: 300;">
+                ${prikazDatuma}
+            </span>
+        </div>
+
+        <h2>` + post.naslov + `</h2> 
+        <p>` + post.tekst + `</p>   
+        
+        <div style="margin-top: 15px; display: flex; justify-content: center; gap: 10px;">
+            <button class="create-btn" onclick="editPost(` + post.id + `)" style="background: #e0b0ff; color: #1a1a2e; padding: 8px 15px;">
+                <i class="fa-solid fa-pen-to-square"></i> Edit
+            </button>
+            <button class="create-btn" onclick="deletePost(` + post.id + `)" style="background: #ff6b6b; color: white; padding: 8px 15px;">
+                <i class="fa-solid fa-trash"></i> Delete
+            </button>
+        </div>
+    `;
+    
+    postsContainer.appendChild(card);
+       });
+
+            }
+        }
+    } catch (error) {
+        console.error("Greška pri komunikaciji sa serverom:", error);
+    }
+
+}
+
+function editPost(postId) {
+    localStorage.setItem('editingPostId', postId);
+    window.location.href = "edit-post.html";
+}
+
+async function deletePost(postId) {
+    if (confirm("Are you sure you want to delete this cosmic entry?")) {
+        const response = await fetch("http://localhost:8085/api/posts/" + postId, { method: 'DELETE' });
+        if (response.ok) {
+            loadUserPosts(localStorage.getItem('loggedInUser'));
+        }
+    }
+     
+}
+</script>
+
+ <div class="moon-phases">
+        ☾ ○ ◐ ● ◑ ○ ☽
+    </div>
+
+</body>
+
+</html>
