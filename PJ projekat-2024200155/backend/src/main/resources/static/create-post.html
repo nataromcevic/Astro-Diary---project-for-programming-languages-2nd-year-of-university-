@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create post</title>
+ 
+     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css"
+          rel="stylesheet">
+
+    <link rel="preconnect"
+          href="https://fonts.googleapis.com">
+
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Poppins:wght@300;400;500&display=swap"
+          rel="stylesheet">
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <link rel="stylesheet"  href="create-post.css">
+
+</head>
+<body>
+
+    <div class="star-layer"></div>
+
+<header class="header">
+    <div class="logo-section">
+        <div class="moon-icon">☾</div>
+        <h1 class="logo">Astro Diary</h1>
+    </div>
+
+    <div class="welcome-text" id="welcomeText">
+        Welcome, (name of user)  <i class="fa-regular fa-circle-user"></i>
+    </div>
+</header>
+
+
+
+<div class="top-divider">✦</div>
+
+<section class="title-section">
+    <h2>✦ Create New Post ✦</h2>
+    <div class="small-line"></div>
+</section>
+
+<section class="create-post-section">
+    <div class="post-card">
+        <form>
+            <div class="input-group-custom">
+                <label>✦ Title</label>
+                <input type="text" id="naslov" placeholder="Give your post a title...">
+            </div>
+
+            <div class="input-group-custom">
+                <label>✦ Your Thoughts</label>
+                <textarea id="tekst" placeholder="Write your thoughts, feelings, reflections..."></textarea>
+            </div>
+
+            <div class="button-container">
+                <button type="submit" id="saveBtn" class="save-btn">
+                    ✦ SAVE ✦
+                </button>
+            </div>
+        </form>
+    </div>
+</section>
+
+
+
+<div class="moon-phases">
+    ☾ ○ ◐ ● ◑ ○ ☽
+</div>
+    
+  <script>
+  window.addEventListener('DOMContentLoaded', () => {
+    
+    const loggedInUser = localStorage.getItem('loggedInUser');
+    console.log("Kreiranje posta - ulogovan je:", loggedInUser);
+
+    if (!loggedInUser) {
+        alert("Niste ulogovani! Vraćamo vas na početnu.");
+        window.location.href = "index.html";
+        return;
+    }
+
+   
+    const welcomeElement = document.getElementById('welcomeText');
+    if (welcomeElement) {
+        welcomeElement.innerHTML = "Welcome, " + loggedInUser + " <i class='fa-regular fa-circle-user'></i>";
+    }
+
+    const saveBtn = document.getElementById('saveBtn');
+
+    
+    if (saveBtn) {
+        saveBtn.addEventListener('click', async (e) => {
+            e.preventDefault(); 
+
+            const naslovInput = document.getElementById('naslov').value.trim();
+            const tekstInput = document.getElementById('tekst').value.trim();
+
+            if (!naslovInput || !tekstInput) {
+                alert("Molimo vas da popunite i naslov i tekst vaše kosmičke beleške! ✦");
+                return;
+            }
+
+            
+            const noviPost = {
+                naslov: naslovInput,
+                tekst: tekstInput 
+            };
+
+            try {
+                const response = await fetch("http://localhost:8085/api/posts/create/" + loggedInUser, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(noviPost)
+                });
+
+                if (response.ok) {
+                    alert("Objava je uspešno sačuvana u zvezdama!✨");
+                    window.location.href = "feed.html"; 
+                } else {
+                    alert("Greška sa serverske strane pri čuvanju posta.");
+                }
+            } catch (error) {
+                const errorText = await response.text(); 
+              console.error("Detalji greške sa servera:", errorText);
+              alert("Greška sa serverske strane: " + errorText);
+            }
+        });
+    }
+});
+</script>
+
+</body>
+</html>

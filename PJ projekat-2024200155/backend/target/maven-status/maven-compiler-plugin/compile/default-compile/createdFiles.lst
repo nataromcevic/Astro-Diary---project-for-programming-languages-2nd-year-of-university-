@@ -1,0 +1,6 @@
+com\astrodiary\backend\controller\PostController.class
+com\astrodiary\backend\entity\User.class
+com\astrodiary\backend\repository\UserRepository.class
+com\astrodiary\backend\entity\Post.class
+com\astrodiary\backend\BackendApplication.class
+com\astrodiary\backend\repository\PostRepository.class
